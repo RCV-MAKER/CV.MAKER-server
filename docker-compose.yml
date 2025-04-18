@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16
+    container_name: nest_boilerplate-postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: nest_boilerplate
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: "UTC"
+    ports:
+      - "25432:5432"
+    networks:
+      - nest_boilerplate-network
+
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    hostname: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - nest_boilerplate-network
+
+  nest_boilerplate-api:
+    image: nest_boilerplate-api
+    container_name: nest_boilerplate-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - nest_boilerplate-network
+
+volumes:
+  postgres_data:
+
+networks:
+  nest_boilerplate-network:
+    driver: bridge
